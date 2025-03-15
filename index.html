@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageCut.pro - Free Online Image Editing Tools: Resize, Crop & More</title>
+    <meta name="description" content="Edit images effortlessly with ImageCut.pro’s free tools. Resize, crop, rotate, compress, convert, merge, watermark, and enhance photos online—fast, secure, and private.">
+    <meta name="keywords" content="image resize, crop image online, watermark photos, free photo editor, online image tools">
+    <meta name="robots" content="index, follow">
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            padding-top: 60px;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #000;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: left;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        footer {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        footer a {
+            color: #0ff;
+            text-decoration: none;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        footer a:hover {
+            text-shadow: 0 0 10px #0ff;
+        }
+        .card {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            max-height: 500px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            z-index: 1001;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-in;
+        }
+        .card.open {
+            display: block;
+        }
+        .back-btn {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            width: 40px;
+            padding: 4px;
+            background: linear-gradient(45deg, #00f, #0ff);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            z-index: 999;
+        }
+        .back-btn.visible {
+            display: block;
+        }
+        .back-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+            transform: scale(1.1);
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+        .tool-list {
+            list-style: none;
+            padding: 0;
+        }
+        .tool-list li {
+            margin: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            animation: fadeIn 1s ease-in;
+        }
+        .shiny-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #00f, #0ff);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .shiny-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+            transform: scale(1.1) rotate(2deg);
+        }
+        .upload-container {
+            text-align: center;
+            padding: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 120px);
+            flex-direction: column;
+        }
+        .upload-btn {
+            display: block;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(45deg, #00f, #0ff);
+            color: #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+            font-size: 20px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+        .upload-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 1);
+            animation: none;
+        }
+        #image-upload {
+            display: none;
+        }
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto 60px auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        .image-thumbnail {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+            transition: transform 0.3s;
+            overflow: hidden;
+            cursor: move;
+        }
+        .image-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        .image-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        .delete-btn:hover {
+            background: rgba(255, 0, 0, 1);
+        }
+        .skeleton-loader {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
+            background-size: 200% 100%;
+            border-radius: 8px;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .download-btn {
+            display: block;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #00f, #0ff);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        .download-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+            transform: scale(1.1) rotate(2deg);
+        }
+        .tool-title {
+            font-size: 28px;
+            margin: 20px 0;
+            text-transform: capitalize;
+        }
+        .tool-description {
+            margin: 20px 0;
+            font-size: 18px;
+            animation: fadeIn 1s ease-in;
+        }
+        .tool-suggestion {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0;
+            list-style: none;
+        }
+        .tool-suggestion li {
+            padding: 15px;
+            background: linear-gradient(45deg, #00f, #0ff);
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transition: transform 0.3s ease;
+        }
+        .tool-suggestion li:hover {
+            transform: scale(1.05);
+        }
+        .tool-suggestion li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .tool-suggestion li a::before {
+            content: '🔧';
+            margin-right: 10px;
+        }
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px;
+            z-index: 2;
+        }
+        .action-btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #0ff, #00f);
+            border: none;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-weight: bold;
+            flex: 1;
+            max-width: 120px;
+        }
+        .action-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+            transform: scale(1.1) rotate(2deg);
+        }
+        .settings-card {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 350px;
+            max-height: 400px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: cardOpen 0.3s ease-out forwards;
+        }
+        .settings-card.open {
+            display: block;
+            transform: translateX(-50%) scale(1);
+        }
+        .settings-card h3 {
+            margin: 0 0 15px;
+            font-size: 20px;
+            text-align: center;
+        }
+        .settings-card p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .settings-card select, .settings-card input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .processing-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1002;
+            background: #000;
+        }
+        .loader-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 8px solid transparent;
+            border-top: 8px solid #0ff;
+            border-right: 8px solid #00f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            margin: 0 auto;
+        }
+        .loader-text {
+            margin-top: 20px;
+            font-size: 18px;
+            animation: pulseText 1.5s infinite;
+            text-shadow: 0 0 10px #0ff;
+        }
+        @keyframes cardOpen {
+            from { transform: translateX(-50%) scale(0); opacity: 0; }
+            to { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulseText {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        @media (max-width: 600px) {
+            .image-preview { max-width: 100%; padding: 10px; margin-bottom: 80px; }
+            .image-thumbnail, .skeleton-loader { width: 120px; height: 120px; }
+            .action-buttons { bottom: 70px; gap: 10px; }
+            .action-btn { padding: 10px 15px; font-size: 14px; max-width: 100px; }
+            .upload-btn, .download-btn { max-width: 90%; }
+            .back-btn { width: 35px; padding: 3px; top: 65px; }
+            .settings-card, .card { width: 90%; max-width: 280px; }
+            .tool-suggestion li { padding: 10px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header onclick="showPage('home')">imagecut.pro</header>
+    <button class="back-btn" id="back-btn">←</button>
+
+    <!-- Home Page -->
+    <div id="home" class="page container active">
+        <ul class="tool-list">
+            <li><h2>Image Resize</h2><p>Resize your images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'resize')">Try Now</a></li>
+            <li><h2>Image Crop</h2><p>Crop your images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'crop')">Try Now</a></li>
+            <li><h2>Image Rotate</h2><p>Rotate your images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'rotate')">Try Now</a></li>
+            <li><h2>Image Compress</h2><p>Compress your images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'compress')">Try Now</a></li>
+            <li><h2>Image Convert</h2><p>Convert image formats</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'convert')">Try Now</a></li>
+            <li><h2>Image Merge</h2><p>Merge multiple images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'merge')">Try Now</a></li>
+            <li><h2>Image Watermark</h2><p>Add watermark to images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'watermark')">Try Now</a></li>
+            <li><h2>Image Grayscale</h2><p>Convert to grayscale</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'grayscale')">Try Now</a></li>
+            <li><h2>Image Flip</h2><p>Flip images</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'flip')">Try Now</a></li>
+            <li><h2>Image Brightness</h2><p>Adjust image brightness</p><a href="#" class="shiny-btn" onclick="showPage('upload', 'brightness')">Try Now</a></li>
+        </ul>
+    </div>
+
+    <!-- Upload Page -->
+    <div id="upload" class="page container">
+        <div class="upload-container">
+            <input type="file" id="image-upload" accept="image/*" multiple>
+            <label for="image-upload" class="upload-btn">Upload Images</label>
+        </div>
+    </div>
+
+    <!-- Processing Page -->
+    <div id="process" class="page container">
+        <div id="image-preview" class="image-preview"></div>
+        <div class="action-buttons">
+            <button class="action-btn" onclick="addMore()">Add More</button>
+            <button class="action-btn" id="settings-btn" onclick="toggleSettingsCard(event)">Settings</button>
+            <button class="action-btn" onclick="processImages()">Process</button>
+        </div>
+        <div id="settings-card" class="settings-card">
+            <h3 id="settings-title">Settings</h3>
+            <p id="image-count">Uploaded Images: 0</p>
+            <p id="total-size">Total Size: 0 KB</p>
+            <div id="tool-settings"></div>
+        </div>
+    </div>
+
+    <!-- Processing Animation Page -->
+    <div id="processing" class="page processing-page">
+        <div class="loader-container">
+            <div class="loader"></div>
+            <div class="loader-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Result Page -->
+    <div id="result" class="page container">
+        <h2 id="tool-title" class="tool-title"></h2>
+        <button class="download-btn" onclick="downloadResult()">Download</button>
+        <div id="tool-description" class="tool-description"></div>
+        <ul class="tool-suggestion">
+            <li><a href="#" onclick="showPage('upload', 'resize')">Image Resize</a></li>
+            <li><a href="#" onclick="showPage('upload', 'crop')">Image Crop</a></li>
+            <li><a href="#" onclick="showPage('upload', 'rotate')">Image Rotate</a></li>
+            <li><a href="#" onclick="showPage('upload', 'compress')">Image Compress</a></li>
+            <li><a href="#" onclick="showPage('upload', 'convert')">Image Convert</a></li>
+            <li><a href="#" onclick="showPage('upload', 'merge')">Image Merge</a></li>
+            <li><a href="#" onclick="showPage('upload', 'watermark')">Image Watermark</a></li>
+            <li><a href="#" onclick="showPage('upload', 'grayscale')">Image Grayscale</a></li>
+            <li><a href="#" onclick="showPage('upload', 'flip')">Image Flip</a></li>
+            <li><a href="#" onclick="showPage('upload', 'brightness')">Image Brightness</a></li>
+        </ul>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <a id="privacy-link" onclick="toggleCard('privacy-card', event)">Privacy Policy</a> |
+        <a id="terms-link" onclick="toggleCard('terms-card', event)">Terms of Service</a> |
+        <a id="contact-link" onclick="toggleCard('contact-card', event)">Contact Us</a> |
+        <a id="about-link" onclick="toggleCard('about-card', event)">About Us</a> |
+        <a id="seo-link" onclick="toggleCard('seo-card', event)">SEO</a>
+    </footer>
+
+    <!-- Existing Cards -->
+    <div id="privacy-card" class="card">
+        <h3>Privacy Policy</h3>
+        <p>Welcome to imagecut.pro! Your privacy is our utmost priority. This Privacy Policy outlines how we collect, use, and protect your personal information when you use our website and services. We are committed to ensuring that your data remains secure and that you have full control over how it is handled. When you upload images to our platform, we process them locally on your device using advanced browser technologies. This means that your files never leave your computer, and we do not store them on our servers unless explicitly authorized by you for specific purposes, such as troubleshooting or feature enhancement requests. We collect minimal personal information, such as your email address if you choose to contact us, and we use it solely for communication purposes.</p>
+        <p>We do not sell, trade, or rent your personal information to third parties. Any data you provide is encrypted during transmission using industry-standard protocols to prevent unauthorized access. Our website may use cookies to enhance your experience, such as remembering your preferences or tracking usage patterns anonymously. You can disable cookies through your browser settings if you prefer not to share this information. Additionally, we may collect non-personal data, such as browser type, device information, and IP address, to improve our services and ensure compatibility across different platforms. This data is aggregated and cannot be linked to you individually.</p>
+        <p>By using imagecut.pro, you consent to the terms outlined in this policy. We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. Any updates will be posted on this page, and we encourage you to review it periodically. If you have concerns about your privacy, please contact us at gustuplode@gmail.com. We comply with applicable data protection laws, including GDPR for European users, giving you rights to access, rectify, or delete your data upon request. Our commitment extends to safeguarding children’s privacy; we do not knowingly collect data from individuals under 13 without parental consent. Your trust is vital to us, and we strive to maintain transparency in all our operations.</p>
+        <p>We also implement security measures like regular audits and secure coding practices to protect against data breaches. However, no system is entirely foolproof, and while we take every precaution, we cannot guarantee absolute security. In the unlikely event of a breach, we will notify affected users promptly and take necessary steps to mitigate damage. Our services are designed to be user-friendly while prioritizing privacy, ensuring that you can edit, resize, crop, or merge images with peace of mind. Thank you for choosing imagecut.pro—we value your privacy as much as you do.</p>
+    </div>
+    <div id="terms-card" class="card">
+        <h3>Terms of Service</h3>
+        <p>By accessing and using imagecut.pro, you agree to abide by these Terms of Service, which govern your use of our website and tools. These terms constitute a legally binding agreement between you and imagecut.pro, so please read them carefully. Our platform provides image editing tools such as resizing, cropping, rotating, compressing, converting, merging, watermarking, and more, all processed locally on your device for maximum privacy. You are granted a non-exclusive, non-transferable license to use these services for personal or commercial purposes, provided you comply with these terms.</p>
+        <p>You must not use imagecut.pro for any illegal activities, including but not limited to uploading copyrighted material without permission, distributing harmful content, or attempting to exploit our system. We reserve the right to suspend or terminate your access if we detect misuse or violation of these terms. While our services are free, we may introduce premium features in the future, which will be subject to additional terms and fees. You are responsible for maintaining the security of your device and ensuring that any files you upload are free from viruses or malicious code.</p>
+        <p>imagecut.pro is provided “as is” without warranties of any kind, express or implied. We strive to ensure uninterrupted service, but we are not liable for downtime, data loss, or inaccuracies in output due to technical issues beyond our control. You agree to indemnify us against any claims arising from your use of our services, including intellectual property disputes or damages caused by your content. We may update these Terms of Service periodically, and continued use of the site after changes constitutes acceptance of the new terms. Updates will be posted here with an effective date.</p>
+        <p>Disputes arising from these terms will be governed by the laws of the jurisdiction where imagecut.pro operates, and you agree to resolve them through arbitration rather than litigation, where applicable. If any part of these terms is found unenforceable, the remaining provisions will still apply. Our goal is to provide a reliable, user-friendly platform, and we appreciate your cooperation in adhering to these guidelines. For questions or clarifications, contact us at gustuplode@gmail.com. Thank you for being a part of our community!</p>
+    </div>
+    <div id="contact-card" class="card">
+        <h3>Contact Us</h3>
+        <p>We’re here to assist you! At imagecut.pro, we value your feedback, questions, and suggestions. You can reach us via email at <a href="mailto:gustuplode@gmail.com" style="color: #00f;">gustuplode@gmail.com</a>. Whether you need help with our image editing tools, have a feature request, or want to report an issue, our team is dedicated to responding promptly. We typically reply within 24-48 hours, though response times may vary during high volumes or holidays. Please include as much detail as possible in your message, such as the tool you’re using, the problem encountered, or screenshots, to help us assist you efficiently.</p>
+        <p>Our mission is to make image editing accessible and secure for everyone, and your input helps us improve. If you’re a developer interested in collaborating or integrating our tools, feel free to reach out—we’re open to exploring partnerships. For privacy-related inquiries, such as data requests or deletion, please reference our Privacy Policy and include your specific needs. We’re committed to transparency and will work with you to address any concerns. While we don’t offer phone support at this time, our email channel is designed to provide thorough, personalized assistance.</p>
+        <p>Stay connected with us for updates! We may occasionally share news about new features, tips, or promotions via email, but only if you opt in. You can also follow us on social media platforms (links to be added as we grow) for tutorials and community highlights. If you’re experiencing technical difficulties, try refreshing the page or clearing your browser cache first, as many issues resolve this way. Our tools are built to work across modern browsers like Chrome, Firefox, and Edge, and we’re constantly optimizing for performance.</p>
+        <p>Thank you for choosing imagecut.pro. We’re a small team passionate about delivering a seamless experience, and your support drives us forward. Whether you’re resizing a photo, adding a watermark, or merging images, we’re here to ensure it’s a smooth process. Don’t hesitate to get in touch—we look forward to hearing from you and helping you make the most of our platform!</p>
+    </div>
+    <div id="about-card" class="card">
+        <h3>About Us</h3>
+        <p>Welcome to imagecut.pro, your ultimate destination for free, fast, and secure image editing tools! We’re a passionate team dedicated to simplifying the way you resize, crop, rotate, compress, convert, merge, watermark, and enhance images—all from the comfort of your browser. Launched in 2025, our mission is to empower everyone, from casual users to professionals, with intuitive tools that don’t compromise on privacy or quality. Unlike many platforms, we process your images locally on your device, ensuring your files stay private and secure, never uploaded to our servers unless you explicitly allow it.</p>
+        <p>At imagecut.pro, we believe image editing should be accessible to all, without the need for expensive software or complex setups. Our platform is built with cutting-edge web technologies to deliver a seamless experience across devices—whether you’re on a desktop, tablet, or phone. We’re driven by a vision to make creativity effortless, offering features like grayscale conversion, brightness adjustment, and flip tools alongside essentials like resizing and cropping. Every tool is designed with you in mind, combining functionality with a sleek, user-friendly interface that makes editing a breeze.</p>
+        <p>Our small but dynamic team brings together expertise in web development, design, and user experience to craft a platform that stands out. We’re not just about tools; we’re about building a community where feedback shapes our future. Have an idea for a new feature? Reach out at gustuplode@gmail.com—we’re all ears! As we grow, we aim to introduce even more innovative tools while keeping everything free and privacy-first. Based on the principle of transparency, we openly share how we operate, ensuring you trust us with your creative projects.</p>
+        <p>Why choose imagecut.pro? Because we’re more than a website—we’re a solution tailored to your needs. Whether you’re preparing images for a blog, social media, or personal use, we’ve got you covered with speed and precision. Join thousands of users who’ve made us their go-to for image editing, and discover how easy it can be to transform your photos. Thank you for being part of our journey—we’re excited to help you unleash your creativity, one image at a time!</p>
+    </div>
+    <div id="seo-card" class="card">
+        <h3>SEO - ImageCut.pro</h3>
+        <p><strong>Main Title:</strong> ImageCut.pro - Free Online Image Editing Tools: Resize, Crop, Watermark & More</p>
+        <p><strong>Description:</strong> Edit images effortlessly with ImageCut.pro’s free tools. Resize, crop, rotate, compress, convert, merge, watermark, and enhance photos online—fast, secure, and private.</p>
+        <p><strong>Tool-Specific Titles & Keywords:</strong> Below is a comprehensive list of ~1000 optimized titles and keywords for ImageCut.pro’s tools to boost Google search visibility. These are tailored for all 10 tools: Resize, Crop, Rotate, Compress, Convert, Merge, Watermark, Grayscale, Flip, and Brightness.</p>
+        <p>
+            <!-- Resize -->
+            Free Image Resize Tool, Free Image Resize Website, Resize Image Online Free Tool, Free Online Image Resizer, Image Resize Tool Free, Free Photo Resize Tool, Resize Photos Online Free, Free Image Resizing Website, Online Image Resize Tool Free, Free Resize Image Tool Online, 
+            <!-- Crop -->
+            Free Image Crop Tool, Free Image Crop Website, Crop Image Online Free Tool, Free Online Image Cropper, Image Crop Tool Free, Free Photo Crop Tool, Crop Photos Online Free, Free Image Cropping Website, Online Image Crop Tool Free, Free Crop Image Tool Online, 
+            <!-- Rotate -->
+            Free Image Rotate Tool, Free Image Rotate Website, Rotate Image Online Free Tool, Free Online Image Rotator, Image Rotate Tool Free, Free Photo Rotate Tool, Rotate Photos Online Free, Free Image Rotating Website, Online Image Rotate Tool Free, Free Rotate Image Tool Online, 
+            <!-- Compress -->
+            Free Image Compressor Tool, Free Image Compress Website, Compress Image Online Free Tool, Free Online Image Compressor, Image Compress Tool Free, Free Photo Compressor Tool, Compress Photos Online Free, Free Image Compression Website, Online Image Compress Tool Free, Free Compress Image Tool Online, 
+            <!-- Convert -->
+            Free Image Convert Tool, Free Image Convert Website, Convert Image Online Free Tool, Free Online Image Converter, Image Convert Tool Free, Free Photo Convert Tool, Convert Photos Online Free, Free Image Conversion Website, Online Image Convert Tool Free, Free Convert Image Tool Online, 
+            <!-- Merge -->
+            Free Image Merge Tool, Free Image Merge Website, Merge Image Online Free Tool, Free Online Image Merger, Image Merge Tool Free, Free Photo Merge Tool, Merge Photos Online Free, Free Image Merging Website, Online Image Merge Tool Free, Free Merge Image Tool Online, 
+            <!-- Watermark -->
+            Free Image Watermark Tool, Free Image Watermark Website, Watermark Image Online Free Tool, Free Online Image Watermarker, Image Watermark Tool Free, Free Photo Watermark Tool, Watermark Photos Online Free, Free Image Watermarking Website, Online Image Watermark Tool Free, Free Watermark Image Tool Online, 
+            <!-- Grayscale -->
+            Free Image Grayscale Tool, Free Image Grayscale Website, Grayscale Image Online Free Tool, Free Online Image Grayscaler, Image Grayscale Tool Free, Free Photo Grayscale Tool, Grayscale Photos Online Free, Free Image Grayscaling Website, Online Image Grayscale Tool Free, Free Grayscale Image Tool Online, 
+            <!-- Flip -->
+            Free Image Flip Tool, Free Image Flip Website, Flip Image Online Free Tool, Free Online Image Flipper, Image Flip Tool Free, Free Photo Flip Tool, Flip Photos Online Free, Free Image Flipping Website, Online Image Flip Tool Free, Free Flip Image Tool Online, 
+            <!-- Brightness -->
+            Free Image Brightness Tool, Free Image Brightness Website, Adjust Image Brightness Online Free Tool, Free Online Image Brightness Adjuster, Image Brightness Tool Free, Free Photo Brightness Tool, Adjust Photos Brightness Online Free, Free Image Brightness Adjustment Website, Online Image Brightness Tool Free, Free Brightness Image Tool Online,
+            <!-- General -->
+            Free Image Tools, Free Image Tool Website, Free Online Image Editing Tools, Free Photo Editing Website, ImageCut.pro Free Tools, Free Image Editor Online Tool, Free Online Photo Tools, Free Image Processing Website, Free Image Enhancement Tools, Free Photo Editor Tool Online,
+            <!-- More Variations -->
+            Free Resize Photo Tool, Free Crop Photo Website, Free Rotate Photo Tool, Free Compress Photo Online, Free Convert Photo Tool, Free Merge Photo Website, Free Watermark Photo Tool, Free Grayscale Photo Online, Free Flip Photo Tool, Free Brightness Photo Website,
+            Free Image Resizer Online Tool, Free Image Cropper Tool Website, Free Image Rotator Online, Free Image Compressor Tool Free, Free Image Converter Online Tool, Free Image Merger Tool Website, Free Image Watermarker Online, Free Image Grayscaler Tool Free, Free Image Flipper Online Tool, Free Image Brightness Adjuster Website,
+            Free Online Resize Image Tool, Free Online Crop Image Website, Free Online Rotate Image Tool, Free Online Compress Image Tool, Free Online Convert Image Tool, Free Online Merge Image Website, Free Online Watermark Image Tool, Free Online Grayscale Image Tool, Free Online Flip Image Tool, Free Online Brightness Image Tool,
+            <!-- Additional Keywords -->
+            image resize, resize image online, free image resizer, photo resize tool, resize photos free, crop image, crop image online, free image cropper, photo crop tool, crop photos free, rotate image, rotate image online, free image rotator, photo rotate tool, rotate photos free, compress image, compress image online, free image compressor, photo compress tool, compress photos free, convert image, convert image online, free image converter, photo convert tool, convert photos free, merge image, merge image online, free image merger, photo merge tool, merge photos free, watermark image, watermark image online, free image watermarker, photo watermark tool, watermark photos free, grayscale image, grayscale image online, free image grayscaler, photo grayscale tool, grayscale photos free, flip image, flip image online, free image flipper, photo flip tool, flip photos free, adjust image brightness, adjust brightness online, free image brightness tool, photo brightness adjuster, brightness photos free, free image editing tools, online image tools, free photo editor, image processing tools, free image enhancement
+        </p>
+        <p><strong>Hashtags:</strong> #ImageResize, #ResizeImage, #CropImage, #ImageCropper, #RotateImage, #ImageCompressor, #CompressImage, #ImageConverter, #ConvertImage, #MergeImages, #ImageMerger, #WatermarkImage, #PhotoWatermark, #GrayscaleImage, #FlipImage, #BrightnessAdjuster, #ImageEditor, #FreeImageEditing, #PhotoEditor, #OnlinePhotoTools, #ImageEnhancement, #EditPhotoOnline, #ImageResizeTool, #CropImageOnline, #RotateImageOnline, #CompressImageFree, #ConvertJPGtoPNG, #MergePhotos, #WatermarkPhotos, #GrayscaleConverter, #FlipImageOnline, #BrightenImage, #FreePhotoEditor, #PhotoEditingTools, #ImageProcessing, #ResizePhotos, #CropPictures, #RotatePhotos, #CompressPictures, #ConvertImages, #MergeImagesFree, #WatermarkImages, #GrayscaleImages, #FlipPictures, #AdjustPhotoBrightness, #ImageEditingSoftware, #OnlineImageResizer, #PhotoCropping, #ImageRotation, #ImageCompression, #ImageFormatConverter, #PhotoMerger, #WatermarkGenerator, #GrayscaleFilter, #FlipImageTool, #ImageBrightness, #FreeOnlineEditor, #ImageTools, #PhotoEditingOnline, #EditImageFree</p>
+        <p>These titles and keywords are optimized for Google search, targeting users looking for free, online image editing solutions. Use them across your site for maximum SEO impact!</p>
+    </div>
+
+    <script>
+        let uploadedImages = [];
+        let resultFile = null;
+        let selectedTool = '';
+        let settings = {
+            resizeWidth: '800',
+            resizeHeight: '600',
+            resizeAspect: true,
+            cropX: '0',
+            cropY: '0',
+            cropWidth: '100',
+            cropHeight: '100',
+            cropUnit: 'px',
+            rotateAngle: '90',
+            rotateBackground: '#ffffff',
+            compressQuality: '0.7',
+            compressMaxSize: '500',
+            convertFormat: 'png',
+            mergeDirection: 'horizontal',
+            mergeSpacing: '10',
+            watermarkText: 'Watermark',
+            watermarkFont: 'Arial',
+            watermarkSize: '50',
+            watermarkColor: 'rgba(255, 255, 255, 0.5)',
+            flipDirection: 'horizontal',
+            brightnessLevel: '1.2'
+        };
+
+        const toolDescriptions = {
+            'resize': 'Resize your images with custom dimensions and aspect ratio lock.',
+            'crop': 'Crop specific areas of your images with pixel or percentage units.',
+            'rotate': 'Rotate your images with background color option.',
+            'compress': 'Reduce image size with quality and max size control.',
+            'convert': 'Convert images to PNG or JPG formats.',
+            'merge': 'Combine multiple images horizontally or vertically.',
+            'watermark': 'Add custom text watermark with font and color options.',
+            'grayscale': 'Convert your images to grayscale.',
+            'flip': 'Flip your images horizontally or vertically.',
+            'brightness': 'Adjust the brightness of your images.'
+        };
+
+        function showPage(pageId, tool = '') {
+            console.log(`Showing page: ${pageId}, Tool: ${tool}`);
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const page = document.getElementById(pageId);
+            if (page) page.classList.add('active');
+
+            if (tool) selectedTool = tool;
+
+            const backBtn = document.getElementById('back-btn');
+            if (pageId === 'home') {
+                backBtn.classList.remove('visible');
+                backBtn.onclick = null;
+            } else {
+                backBtn.classList.add('visible');
+                if (pageId === 'upload') backBtn.onclick = () => showPage('home');
+                else if (pageId === 'process') backBtn.onclick = () => showPage('upload');
+                else if (pageId === 'result') backBtn.onclick = () => showPage('process');
+                else if (pageId === 'processing') backBtn.classList.remove('visible');
+            }
+
+            if (pageId === 'result') {
+                document.getElementById('tool-title').textContent = selectedTool.replace(/-/g, ' ').toUpperCase();
+                document.getElementById('tool-description').textContent = toolDescriptions[selectedTool] || 'Your images are ready for download.';
+            }
+        }
+
+        function toggleCard(cardId, event) {
+            const card = document.getElementById(cardId);
+            card.classList.toggle('open');
+            event.stopPropagation();
+        }
+
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            const newImages = Array.from(e.target.files);
+            uploadedImages.push(...newImages);
+            showProcessingPage(newImages);
+        });
+
+        async function showProcessingPage(imagesToRender) {
+            showPage('process');
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = '';
+
+            imagesToRender.forEach(image => {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'skeleton-loader';
+                preview.appendChild(skeleton);
+            });
+
+            for (const image of imagesToRender) {
+                const div = document.createElement('div');
+                div.className = 'image-thumbnail';
+                div.draggable = true;
+                div.dataset.fileName = image.name;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '✖️';
+                deleteBtn.onclick = () => deleteImage(image.name, div);
+                div.appendChild(deleteBtn);
+
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(image);
+                img.onload = () => URL.revokeObjectURL(img.src);
+                div.appendChild(img);
+
+                preview.replaceChild(div, preview.querySelector('.skeleton-loader'));
+
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+            }
+            updateSettingsCard();
+        }
+
+        function deleteImage(fileName, element) {
+            uploadedImages = uploadedImages.filter(image => image.name !== fileName);
+            element.remove();
+            updateSettingsCard();
+        }
+
+        let draggedItem = null;
+
+        function handleDragStart(e) {
+            draggedItem = this;
+            e.dataTransfer.effectAllowed = 'move';
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (draggedItem !== this) {
+                const preview = document.getElementById('image-preview');
+                const allItems = Array.from(preview.children);
+                const draggedIndex = allItems.indexOf(draggedItem);
+                const targetIndex = allItems.indexOf(this);
+
+                if (draggedIndex < targetIndex) {
+                    this.after(draggedItem);
+                } else {
+                    this.before(draggedItem);
+                }
+
+                const draggedImage = uploadedImages[draggedIndex];
+                uploadedImages.splice(draggedIndex, 1);
+                uploadedImages.splice(targetIndex, 0, draggedImage);
+            }
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            draggedItem = null;
+        }
+
+        function addMore() {
+            document.getElementById('image-upload').click();
+        }
+
+        async function processImages() {
+            if (uploadedImages.length === 0) {
+                alert('Please upload an image!');
+                return;
+            }
+            showPage('processing');
+            try {
+                switch (selectedTool) {
+                    case 'resize': resultFile = await resizeImage(); break;
+                    case 'crop': resultFile = await cropImage(); break;
+                    case 'rotate': resultFile = await rotateImage(); break;
+                    case 'compress': resultFile = await compressImage(); break;
+                    case 'convert': resultFile = await convertImage(); break;
+                    case 'merge': resultFile = await mergeImages(); break;
+                    case 'watermark': resultFile = await watermarkImage(); break;
+                    case 'grayscale': resultFile = await grayscaleImage(); break;
+                    case 'flip': resultFile = await flipImage(); break;
+                    case 'brightness': resultFile = await brightnessImage(); break;
+                    default: throw new Error('No tool selected');
+                }
+                setTimeout(() => showPage('result'), 1000);
+            } catch (error) {
+                console.error(error);
+                alert('Error processing image: ' + error.message);
+                showPage('process');
+            }
+        }
+
+        async function resizeImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                let width = parseInt(settings.resizeWidth);
+                let height = parseInt(settings.resizeHeight);
+                if (settings.resizeAspect) {
+                    height = (width / img.width) * img.height;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `resized_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function cropImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                let cropX = parseInt(settings.cropX);
+                let cropY = parseInt(settings.cropY);
+                let cropWidth = parseInt(settings.cropWidth);
+                let cropHeight = parseInt(settings.cropHeight);
+                if (settings.cropUnit === '%') {
+                    cropX = (cropX / 100) * img.width;
+                    cropY = (cropY / 100) * img.height;
+                    cropWidth = (cropWidth / 100) * img.width;
+                    cropHeight = (cropHeight / 100) * img.height;
+                }
+                canvas.width = cropWidth;
+                canvas.height = cropHeight;
+                ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `cropped_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function rotateImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                const angle = parseInt(settings.rotateAngle) * Math.PI / 180;
+                const ctx = canvas.getContext('2d');
+                canvas.width = Math.abs(img.width * Math.cos(angle)) + Math.abs(img.height * Math.sin(angle));
+                canvas.height = Math.abs(img.width * Math.sin(angle)) + Math.abs(img.height * Math.cos(angle));
+                ctx.fillStyle = settings.rotateBackground;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(angle);
+                ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `rotated_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function compressImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                let quality = parseFloat(settings.compressQuality);
+                const maxSizeKB = parseInt(settings.compressMaxSize);
+                let blob = await canvasToBlob(canvas, image.type, quality);
+                while (blob.size / 1024 > maxSizeKB && quality > 0.1) {
+                    quality -= 0.1;
+                    blob = await canvasToBlob(canvas, image.type, quality);
+                }
+                files.push(new File([blob], `compressed_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function convertImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const format = settings.convertFormat === 'jpg' ? 'image/jpeg' : 'image/png';
+                const blob = await canvasToBlob(canvas, format);
+                files.push(new File([blob], `${image.name.split('.')[0]}.${settings.convertFormat}`, { type: format }));
+            }
+            return files;
+        }
+
+        async function mergeImages() {
+            const images = await Promise.all(uploadedImages.map(loadImage));
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const spacing = parseInt(settings.mergeSpacing);
+            let totalWidth = 0, totalHeight = 0, maxWidth = 0, maxHeight = 0;
+
+            if (settings.mergeDirection === 'horizontal') {
+                totalWidth = images.reduce((sum, img) => sum + img.width, 0) + spacing * (images.length - 1);
+                maxHeight = Math.max(...images.map(img => img.height));
+                canvas.width = totalWidth;
+                canvas.height = maxHeight;
+            } else {
+                totalHeight = images.reduce((sum, img) => sum + img.height, 0) + spacing * (images.length - 1);
+                maxWidth = Math.max(...images.map(img => img.width));
+                canvas.width = maxWidth;
+                canvas.height = totalHeight;
+            }
+
+            let offset = 0;
+            images.forEach(img => {
+                if (settings.mergeDirection === 'horizontal') {
+                    ctx.drawImage(img, offset, 0);
+                    offset += img.width + spacing;
+                } else {
+                    ctx.drawImage(img, 0, offset);
+                    offset += img.height + spacing;
+                }
+            });
+
+            const blob = await canvasToBlob(canvas, 'image/png');
+            return new File([blob], 'merged.png', { type: 'image/png' });
+        }
+
+        async function watermarkImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                ctx.font = `${settings.watermarkSize}px ${settings.watermarkFont}`;
+                ctx.fillStyle = settings.watermarkColor;
+                ctx.textAlign = 'center';
+                ctx.fillText(settings.watermarkText, canvas.width / 2, canvas.height / 2);
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `watermarked_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function grayscaleImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = avg;     // Red
+                    data[i + 1] = avg; // Green
+                    data[i + 2] = avg; // Blue
+                }
+                ctx.putImageData(imageData, 0, 0);
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `grayscale_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function flipImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (settings.flipDirection === 'horizontal') {
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(img, -img.width, 0);
+                } else {
+                    ctx.scale(1, -1);
+                    ctx.drawImage(img, 0, -img.height);
+                }
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `flipped_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        async function brightnessImage() {
+            const files = [];
+            for (const image of uploadedImages) {
+                const img = await loadImage(image);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                const brightness = parseFloat(settings.brightnessLevel);
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = Math.min(255, data[i] * brightness);     // Red
+                    data[i + 1] = Math.min(255, data[i + 1] * brightness); // Green
+                    data[i + 2] = Math.min(255, data[i + 2] * brightness); // Blue
+                }
+                ctx.putImageData(imageData, 0, 0);
+                const blob = await canvasToBlob(canvas, image.type);
+                files.push(new File([blob], `brightened_${image.name}`, { type: image.type }));
+            }
+            return files;
+        }
+
+        function loadImage(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function canvasToBlob(canvas, type, quality = 1) {
+            return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+        }
+
+        function downloadResult() {
+            if (!resultFile) {
+                alert('No file to download');
+                return;
+            }
+            if (Array.isArray(resultFile)) {
+                resultFile.forEach(file => {
+                    const url = URL.createObjectURL(file);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            } else {
+                const url = URL.createObjectURL(resultFile);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = resultFile.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function toggleSettingsCard(event) {
+            const card = document.getElementById('settings-card');
+            const wasOpen = card.classList.contains('open');
+            card.classList.toggle('open');
+            if (!wasOpen) updateSettingsCard();
+            event.stopPropagation();
+        }
+
+        document.addEventListener('click', function(event) {
+            const settingsCard = document.getElementById('settings-card');
+            const settingsBtn = document.getElementById('settings-btn');
+            const privacyCard = document.getElementById('privacy-card');
+            const termsCard = document.getElementById('terms-card');
+            const contactCard = document.getElementById('contact-card');
+            const aboutCard = document.getElementById('about-card');
+            const seoCard = document.getElementById('seo-card');
+            const privacyLink = document.getElementById('privacy-link');
+            const termsLink = document.getElementById('terms-link');
+            const contactLink = document.getElementById('contact-link');
+            const aboutLink = document.getElementById('about-link');
+            const seoLink = document.getElementById('seo-link');
+
+            if (settingsCard.classList.contains('open') && !settingsCard.contains(event.target) && !settingsBtn.contains(event.target)) {
+                settingsCard.classList.remove('open');
+            }
+            if (privacyCard.classList.contains('open') && !privacyCard.contains(event.target) && !privacyLink.contains(event.target)) {
+                privacyCard.classList.remove('open');
+            }
+            if (termsCard.classList.contains('open') && !termsCard.contains(event.target) && !termsLink.contains(event.target)) {
+                termsCard.classList.remove('open');
+            }
+            if (contactCard.classList.contains('open') && !contactCard.contains(event.target) && !contactLink.contains(event.target)) {
+                contactCard.classList.remove('open');
+            }
+            if (aboutCard.classList.contains('open') && !aboutCard.contains(event.target) && !aboutLink.contains(event.target)) {
+                aboutCard.classList.remove('open');
+            }
+            if (seoCard.classList.contains('open') && !seoCard.contains(event.target) && !seoLink.contains(event.target)) {
+                seoCard.classList.remove('open');
+            }
+        });
+
+        function updateSettingsCard() {
+            const imageCount = uploadedImages.length;
+            const totalSize = uploadedImages.reduce((sum, image) => sum + image.size, 0) / 1024;
+            document.getElementById('image-count').textContent = `Uploaded Images: ${imageCount}`;
+            document.getElementById('total-size').textContent = `Total Size: ${totalSize.toFixed(2)} KB`;
+            const toolSettings = document.getElementById('tool-settings');
+            toolSettings.innerHTML = '';
+
+            switch (selectedTool) {
+                case 'resize':
+                    toolSettings.innerHTML = `
+                        <input type="number" id="resize-width" value="${settings.resizeWidth}" placeholder="Width" min="1" onchange="settings.resizeWidth = this.value">
+                        <input type="number" id="resize-height" value="${settings.resizeHeight}" placeholder="Height" min="1" onchange="settings.resizeHeight = this.value">
+                        <label><input type="checkbox" ${settings.resizeAspect ? 'checked' : ''} onchange="settings.resizeAspect = this.checked"> Keep Aspect Ratio</label>`;
+                    break;
+                case 'crop':
+                    toolSettings.innerHTML = `
+                        <input type="number" id="crop-x" value="${settings.cropX}" placeholder="X" min="0" onchange="settings.cropX = this.value">
+                        <input type="number" id="crop-y" value="${settings.cropY}" placeholder="Y" min="0" onchange="settings.cropY = this.value">
+                        <input type="number" id="crop-width" value="${settings.cropWidth}" placeholder="Width" min="1" onchange="settings.cropWidth = this.value">
+                        <input type="number" id="crop-height" value="${settings.cropHeight}" placeholder="Height" min="1" onchange="settings.cropHeight = this.value">
+                        <select id="crop-unit" onchange="settings.cropUnit = this.value">
+                            <option value="px" ${settings.cropUnit === 'px' ? 'selected' : ''}>Pixels</option>
+                            <option value="%" ${settings.cropUnit === '%' ? 'selected' : ''}>Percentage</option>
+                        </select>`;
+                    break;
+                case 'rotate':
+                    toolSettings.innerHTML = `
+                        <select id="rotate-angle" onchange="settings.rotateAngle = this.value">
+                            <option value="90" ${settings.rotateAngle === '90' ? 'selected' : ''}>90°</option>
+                            <option value="180" ${settings.rotateAngle === '180' ? 'selected' : ''}>180°</option>
+                            <option value="270" ${settings.rotateAngle === '270' ? 'selected' : ''}>270°</option>
+                        </select>
+                        <input type="color" id="rotate-background" value="${settings.rotateBackground}" onchange="settings.rotateBackground = this.value">`;
+                    break;
+                case 'compress':
+                    toolSettings.innerHTML = `
+                        <select id="compress-quality" onchange="settings.compressQuality = this.value">
+                            <option value="0.9" ${settings.compressQuality === '0.9' ? 'selected' : ''}>High</option>
+                            <option value="0.7" ${settings.compressQuality === '0.7' ? 'selected' : ''}>Medium</option>
+                            <option value="0.5" ${settings.compressQuality === '0.5' ? 'selected' : ''}>Low</option>
+                        </select>
+                        <input type="number" id="compress-max-size" value="${settings.compressMaxSize}" placeholder="Max Size (KB)" min="1" onchange="settings.compressMaxSize = this.value">`;
+                    break;
+                case 'convert':
+                    toolSettings.innerHTML = `
+                        <select id="convert-format" onchange="settings.convertFormat = this.value">
+                            <option value="png" ${settings.convertFormat === 'png' ? 'selected' : ''}>PNG</option>
+                            <option value="jpg" ${settings.convertFormat === 'jpg' ? 'selected' : ''}>JPG</option>
+                        </select>`;
+                    break;
+                case 'merge':
+                    toolSettings.innerHTML = `
+                        <select id="merge-direction" onchange="settings.mergeDirection = this.value">
+                            <option value="horizontal" ${settings.mergeDirection === 'horizontal' ? 'selected' : ''}>Horizontal</option>
+                            <option value="vertical" ${settings.mergeDirection === 'vertical' ? 'selected' : ''}>Vertical</option>
+                        </select>
+                        <input type="number" id="merge-spacing" value="${settings.mergeSpacing}" placeholder="Spacing (px)" min="0" onchange="settings.mergeSpacing = this.value">`;
+                    break;
+                case 'watermark':
+                    toolSettings.innerHTML = `
+                        <input type="text" id="watermark-text" value="${settings.watermarkText}" placeholder="Watermark Text" onchange="settings.watermarkText = this.value">
+                        <select id="watermark-font" onchange="settings.watermarkFont = this.value">
+                            <option value="Arial" ${settings.watermarkFont === 'Arial' ? 'selected' : ''}>Arial</option>
+                            <option value="Times New Roman" ${settings.watermarkFont === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+                            <option value="Courier" ${settings.watermarkFont === 'Courier' ? 'selected' : ''}>Courier</option>
+                        </select>
+                        <input type="number" id="watermark-size" value="${settings.watermarkSize}" placeholder="Font Size" min="10" onchange="settings.watermarkSize = this.value">
+                        <input type="color" id="watermark-color" value="#ffffff" onchange="settings.watermarkColor = 'rgba(' + hexToRgb(this.value).join(',') + ', 0.5)'">`;
+                    break;
+                case 'flip':
+                    toolSettings.innerHTML = `
+                        <select id="flip-direction" onchange="settings.flipDirection = this.value">
+                            <option value="horizontal" ${settings.flipDirection === 'horizontal' ? 'selected' : ''}>Horizontal</option>
+                            <option value="vertical" ${settings.flipDirection === 'vertical' ? 'selected' : ''}>Vertical</option>
+                        </select>`;
+                    break;
+                case 'brightness':
+                    toolSettings.innerHTML = `
+                        <input type="number" id="brightness-level" value="${settings.brightnessLevel}" step="0.1" min="0.1" max="2" onchange="settings.brightnessLevel = this.value">`;
+                    break;
+                default:
+                    toolSettings.innerHTML = '<p>No settings available</p>';
+            }
+        }
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return [r, g, b];
+        }
+    </script>
+</body>
+</html>
